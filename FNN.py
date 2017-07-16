@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
 class FNN:
@@ -73,15 +74,45 @@ class FNN:
                 print('Epoch:\t{0}\tMSE:\t{1:.13f}'.format(epoch, np.average(square_losses)))
 
 
-if __name__ == '__main__':
-    data = [([0, 0], [0, 1, 0]),
-            ([0, 1], [1, 1, 1]),
-            ([1, 1], [0, 0, 1]),
-            ([1, 0], [1, 0, 0])]
+def load_dataset(data_file):
+    with open(data_file) as f:
+        iris_data = f.read().splitlines()
 
-    input_size = np.shape(data[0][0])[0]
-    hidden_size = 2 * np.shape(data[0][0])[0]
-    output_size = np.shape(data[0][1])[0]
+    class_data_dict = {}
+    for line in iris_data:
+        data_points = line.split(',')
+        features = [float(feat) for feat in data_points[:-1]]
+        gt_class = data_points[-1]
+        if gt_class not in class_data_dict:
+            class_data_dict[gt_class] = []
+        class_data_dict[gt_class].append(features)
+
+    classes = {'Iris-setosa': [1, 0],
+               'Iris-versicolor': [0, 1],
+               'Iris-virginica': [1, 1]}
+
+    train_data = []
+    test_data = []
+    for gt_class in classes:
+        random.shuffle(class_data_dict[gt_class])
+        train_size = int(round(len(class_data_dict[gt_class]) * .66))
+        train = class_data_dict[gt_class][:train_size]
+        test = class_data_dict[gt_class][train_size:]
+        [train_data.append((ss, classes[gt_class])) for ss in train]
+        [test_data.append((ss, classes[gt_class])) for ss in test]
+
+    return train_data, test_data
+
+
+if __name__ == '__main__':
+    train_set, test_set = load_dataset('iris.data')
+
+    for name, data in [('Train', train_set), ('Test', test_set)]:
+        print('{0}\n* samples No.\t{1}\n* features No.\t{2}'.format(name, len(data), len(data[0][0])))
+
+    input_size = np.shape(train_set[0][0])[0]
+    hidden_size = 2 * np.shape(train_set[0][0])[0]
+    output_size = np.shape(train_set[0][1])[0]
 
     fnn = FNN(input_size, hidden_size, output_size)
-    fnn.fit(data)
+    fnn.fit(train_set)
