@@ -27,10 +27,9 @@ class FNN:
     def predict(self, x):
         l0_output = self.__activation(x, self.l0_weights, self.l0_biases)
         l1_output = self.__activation(l0_output, self.l1_weights, self.l1_biases)
-        return [int(round(i)) for i in l1_output]
+        return l1_output
 
-    @staticmethod
-    def __plot_loss(mse):
+    def __plot_loss(self, mse, test_set):
         plt.cla()
         plt.title('Train Loss')
         plt.xlabel('Epoch')
@@ -40,7 +39,7 @@ class FNN:
         plt.pause(.0001)
 
     # see: http://ufldl.stanford.edu/wiki/index.php/Backpropagation_Algorithm
-    def fit(self, samples, epochs=1000, lr=.1, momentum=.1, info=True):
+    def fit(self, train_samples, test_samples, epochs=1000, lr=.1, momentum=.1, info=True):
         if info:
             plt.ion()
 
@@ -49,7 +48,7 @@ class FNN:
             square_losses = []
             last_l1_update = 0
             last_l0_update = 0
-            for sample in np.random.permutation(samples):
+            for sample in np.random.permutation(train_samples):
                 observation, expectation = sample
                 # move forward
                 l0_output = self.__activation(observation, self.l0_weights, self.l0_biases)
@@ -70,7 +69,7 @@ class FNN:
 
             if info:
                 mse.append(np.average(square_losses))
-                self.__plot_loss(mse)
+                self.__plot_loss(mse, test_set)
                 print('Epoch:\t{0}\tMSE:\t{1:.13f}'.format(epoch, np.average(square_losses)))
 
 
@@ -96,10 +95,13 @@ def load_dataset(data_file):
     for gt_class in classes:
         random.shuffle(class_data_dict[gt_class])
         train_size = int(round(len(class_data_dict[gt_class]) * .66))
-        train = class_data_dict[gt_class][:train_size]
-        test = class_data_dict[gt_class][train_size:]
-        [train_data.append((ss, classes[gt_class])) for ss in train]
-        [test_data.append((ss, classes[gt_class])) for ss in test]
+        train_split = class_data_dict[gt_class][:train_size]
+        test_split = class_data_dict[gt_class][train_size:]
+        [train_data.append((sample, classes[gt_class])) for sample in train_split]
+        [test_data.append((sample, classes[gt_class])) for sample in test_split]
+
+    for name, data in [('Train', train_data), ('Test', test_data)]:
+        print('{0}\n* samples No.\t{1}\n* features No.\t{2}'.format(name, len(data), len(data[0][0])))
 
     return train_data, test_data
 
@@ -107,12 +109,9 @@ def load_dataset(data_file):
 if __name__ == '__main__':
     train_set, test_set = load_dataset('res/iris.data')
 
-    for name, data in [('Train', train_set), ('Test', test_set)]:
-        print('{0}\n* samples No.\t{1}\n* features No.\t{2}'.format(name, len(data), len(data[0][0])))
-
     input_size = np.shape(train_set[0][0])[0]
     hidden_size = 2 * np.shape(train_set[0][0])[0]
     output_size = np.shape(train_set[0][1])[0]
 
     fnn = FNN(input_size, hidden_size, output_size)
-    fnn.fit(train_set)
+    fnn.fit(train_set, test_set)
