@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 
 
 class FNN:
@@ -29,21 +28,33 @@ class FNN:
         l1_output = self.__activation(l0_output, self.l1_weights, self.l1_biases)
         return l1_output
 
-    def __plot_loss(self, mse, test_set):
+    @staticmethod
+    def __plot_loss(mse, test_mse):
         plt.cla()
         plt.title('Train Loss')
         plt.xlabel('Epoch')
         plt.ylabel('MSE')
 
-        plt.plot(mse)
+        plt.plot(mse, label='train')
+        plt.plot(test_mse, label='validation')
+        plt.legend()
         plt.pause(.0001)
 
+    def evaluate(self, data):
+        square_losses = []
+        for sample in data:
+            observation, expectation = sample
+            loss = (expectation - self.predict(observation))**2
+            square_losses.append(loss)
+        return np.average(square_losses)
+
     # see: http://ufldl.stanford.edu/wiki/index.php/Backpropagation_Algorithm
-    def fit(self, train_samples, test_samples, epochs=1000, lr=.1, momentum=.1, info=True):
+    def fit(self, train_samples, test_samples, epochs=100, lr=.1, momentum=.1, info=True):
         if info:
             plt.ion()
 
-        mse = []
+        train_mse = []
+        validation_mse = []
         for epoch in range(epochs):
             square_losses = []
             last_l1_update = 0
@@ -68,50 +79,20 @@ class FNN:
                 self.l1_biases += l1_error
 
             if info:
-                mse.append(np.average(square_losses))
-                self.__plot_loss(mse, test_set)
-                print('Epoch:\t{0}\tMSE:\t{1:.13f}'.format(epoch, np.average(square_losses)))
-
-
-def load_dataset(data_file):
-    with open(data_file) as f:
-        iris_data = f.read().splitlines()
-
-    class_data_dict = {}
-    for line in iris_data:
-        data_points = line.split(',')
-        features = [float(feat) for feat in data_points[:-1]]
-        gt_class = data_points[-1]
-        if gt_class not in class_data_dict:
-            class_data_dict[gt_class] = []
-        class_data_dict[gt_class].append(features)
-
-    classes = {'Iris-setosa': [1, 0],
-               'Iris-versicolor': [0, 1],
-               'Iris-virginica': [1, 1]}
-
-    train_data = []
-    test_data = []
-    for gt_class in classes:
-        random.shuffle(class_data_dict[gt_class])
-        train_size = int(round(len(class_data_dict[gt_class]) * .66))
-        train_split = class_data_dict[gt_class][:train_size]
-        test_split = class_data_dict[gt_class][train_size:]
-        [train_data.append((sample, classes[gt_class])) for sample in train_split]
-        [test_data.append((sample, classes[gt_class])) for sample in test_split]
-
-    for name, data in [('Train', train_data), ('Test', test_data)]:
-        print('{0}\n* samples No.\t{1}\n* features No.\t{2}'.format(name, len(data), len(data[0][0])))
-
-    return train_data, test_data
-
+                train_mse.append(np.average(square_losses))
+                validation_mse.append(self.evaluate(test_samples))
+                self.__plot_loss(train_mse, validation_mse)
+                print('Epoch:\t{0}\t'
+                      'Train MSE:\t{1:.13f}\t'
+                      'Validation MSE:\t{2:.13f}'.format(epoch, np.average(square_losses), validation_mse[-1]))
 
 if __name__ == '__main__':
-    train_set, test_set = load_dataset('res/iris.data')
+    from Iris import load_iris
+    train, test, validation = load_iris('res/iris.data')
 
-    input_size = np.shape(train_set[0][0])[0]
-    hidden_size = 2 * np.shape(train_set[0][0])[0]
-    output_size = np.shape(train_set[0][1])[0]
+    input_size = np.shape(train[0][0])[0]
+    hidden_size = 2 * input_size
+    output_size = np.shape(train[0][1])[0]
 
     fnn = FNN(input_size, hidden_size, output_size)
-    fnn.fit(train_set, test_set)
+    fnn.fit(train, validation)
