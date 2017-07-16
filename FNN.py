@@ -105,7 +105,7 @@ def load_dataset(data_file):
 
 
 if __name__ == '__main__':
-    train_set, test_set = load_dataset('iris.data')
+    train_set, test_set = load_dataset('res/iris.data')
 
     for name, data in [('Train', train_set), ('Test', test_set)]:
         print('{0}\n* samples No.\t{1}\n* features No.\t{2}'.format(name, len(data), len(data[0][0])))
