@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class FNN:
@@ -27,8 +28,24 @@ class FNN:
         l1_output = self.__activation(l0_output, self.l1_weights, self.l1_biases)
         return [int(round(i)) for i in l1_output]
 
+    @staticmethod
+    def __plot_loss(loss_plot, mse):
+        loss_plot.clear()
+        loss_plot.set_title('Train Loss')
+        loss_plot.set_xlabel('Epoch')
+        loss_plot.set_ylabel('MSE')
+
+        loss_plot.plot(mse)
+        plt.pause(.0001)
+
     # see: http://ufldl.stanford.edu/wiki/index.php/Backpropagation_Algorithm
     def fit(self, samples, epochs=1000, lr=.1, momentum=.1, info=True):
+        if info:
+            plt.ion()
+            loss_plot = plt.subplot(121)
+            rule_plot = plt.subplot(122)
+
+        mse = []
         for epoch in range(epochs):
             square_losses = []
             last_l1_update = 0
@@ -53,6 +70,8 @@ class FNN:
                 self.l1_biases += l1_error
 
             if info:
+                mse.append(np.average(square_losses))
+                self.__plot_loss(loss_plot, mse)
                 print('Epoch:\t{0}\tMSE:\t{1:.13f}'.format(epoch, np.average(square_losses)))
 
 
