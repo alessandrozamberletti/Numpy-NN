@@ -29,21 +29,19 @@ class FNN:
         return [int(round(i)) for i in l1_output]
 
     @staticmethod
-    def __plot_loss(loss_plot, mse):
-        loss_plot.clear()
-        loss_plot.set_title('Train Loss')
-        loss_plot.set_xlabel('Epoch')
-        loss_plot.set_ylabel('MSE')
+    def __plot_loss(mse):
+        plt.cla()
+        plt.title('Train Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('MSE')
 
-        loss_plot.plot(mse)
+        plt.plot(mse)
         plt.pause(.0001)
 
     # see: http://ufldl.stanford.edu/wiki/index.php/Backpropagation_Algorithm
     def fit(self, samples, epochs=1000, lr=.1, momentum=.1, info=True):
         if info:
             plt.ion()
-            loss_plot = plt.subplot(121)
-            rule_plot = plt.subplot(122)
 
         mse = []
         for epoch in range(epochs):
@@ -60,7 +58,7 @@ class FNN:
                 square_losses.append(loss**2)
                 l1_error = loss * (l1_output * (1 - l1_output))
                 l0_error = np.dot(self.l1_weights, l1_error) * (l0_output * (1 - l0_output))
-                # get weight updates
+                # compute weight updates
                 last_l1_update = l1_update = momentum * last_l1_update + lr * np.outer(l0_output, l1_error)
                 last_l0_update = l0_update = momentum * last_l0_update + lr * np.outer(observation, l0_error)
                 # update weights and biases
@@ -71,7 +69,7 @@ class FNN:
 
             if info:
                 mse.append(np.average(square_losses))
-                self.__plot_loss(loss_plot, mse)
+                self.__plot_loss(mse)
                 print('Epoch:\t{0}\tMSE:\t{1:.13f}'.format(epoch, np.average(square_losses)))
 
 
