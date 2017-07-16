@@ -68,5 +68,3 @@ if __name__ == '__main__':
 
     fnn = FNN(input_size, hidden_size, output_size)
     fnn.fit(data)
-
-    print(fnn.predict(data[0][0]))
