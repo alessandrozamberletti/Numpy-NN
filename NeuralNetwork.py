@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+from Iris import Iris
+
 
 class NeuralNetwork:
     def __init__(self, no_input_units, no_hidden_units, no_output_units):
@@ -84,9 +86,8 @@ class NeuralNetwork:
                       'Validation MSE:\t{2:.13f}'.format(epoch, np.average(square_losses), validation_mse[-1]))
 
 if __name__ == '__main__':
-    from Iris import load_iris
-    iris_data = os.path.join(os.path.dirname(__file__), 'res', 'iris.data')
-    train, test, validation = load_iris(iris_data)
+    data_path = os.path.join(os.path.dirname(__file__), 'res', 'iris.data')
+    train, validation, test = Iris().load(data_path)
 
     input_size = np.shape(train[0][0])[0]
     hidden_size = 2 * input_size
