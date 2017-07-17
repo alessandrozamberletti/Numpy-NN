@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 class NeuralNetwork:
@@ -84,7 +85,8 @@ class NeuralNetwork:
 
 if __name__ == '__main__':
     from Iris import load_iris
-    train, test, validation = load_iris('res/iris.data')
+    iris_data = os.path.join(os.path.dirname(__file__), 'res', 'iris.data')
+    train, test, validation = load_iris(iris_data)
 
     input_size = np.shape(train[0][0])[0]
     hidden_size = 2 * input_size
