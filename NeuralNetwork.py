@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-class FNN:
+class NeuralNetwork:
     def __init__(self, no_input_units, no_hidden_units, no_output_units):
         np.random.seed(1)
 
@@ -23,11 +23,6 @@ class FNN:
     def __activation(self, x, weights, biases):
         return self.__transfer((np.dot(x, weights) + biases)[0])
 
-    def predict(self, x):
-        l0_output = self.__activation(x, self.l0_weights, self.l0_biases)
-        l1_output = self.__activation(l0_output, self.l1_weights, self.l1_biases)
-        return l1_output
-
     @staticmethod
     def __plot_loss(mse, test_mse):
         plt.cla()
@@ -41,12 +36,13 @@ class FNN:
         plt.pause(.0001)
 
     def evaluate(self, data):
-        square_losses = []
-        for sample in data:
-            observation, expectation = sample
-            loss = (expectation - self.predict(observation))**2
-            square_losses.append(loss)
-        return np.average(square_losses)
+        samples = [el[0] for el in data]
+        targets = [el[1] for el in data]
+
+        l0_output = self.__transfer((np.dot(samples, self.l0_weights) + self.l0_biases))
+        l1_output = self.__transfer((np.dot(l0_output, self.l1_weights) + self.l1_biases))
+
+        return np.average(np.power(targets - l1_output, 2))
 
     # see: http://ufldl.stanford.edu/wiki/index.php/Backpropagation_Algorithm
     def fit(self, train_samples, test_samples, epochs=100, lr=.1, momentum=.1, info=True):
@@ -94,5 +90,5 @@ if __name__ == '__main__':
     hidden_size = 2 * input_size
     output_size = np.shape(train[0][1])[0]
 
-    fnn = FNN(input_size, hidden_size, output_size)
-    fnn.fit(train, validation)
+    neural_network = NeuralNetwork(input_size, hidden_size, output_size)
+    neural_network.fit(train, validation)
