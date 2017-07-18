@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-from Iris import Iris
+from IrisManager import IrisManager
 
 
 class NeuralNetwork:
@@ -87,7 +87,7 @@ class NeuralNetwork:
 
 if __name__ == '__main__':
     data_path = os.path.join(os.path.dirname(__file__), 'res', 'iris.data')
-    train, validation, test = Iris().load(data_path)
+    train, validation, test = IrisManager(data_path).split()
 
     input_size = np.shape(train[0][0])[0]
     hidden_size = 2 * input_size
