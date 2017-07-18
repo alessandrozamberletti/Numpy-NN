@@ -15,8 +15,8 @@ class IrisManager:
                     self.data_dict[gt_class] = []
                 self.data_dict[gt_class].append(features)
 
-    def __fill(self, data, gt_class, range):
-        return data.extend([(sample, self.classes[gt_class]) for sample in self.data_dict[gt_class][range]])
+    def __fill(self, data, gt_class, selection):
+        return data.extend([(sample, self.classes[gt_class]) for sample in self.data_dict[gt_class][selection]])
 
     def split(self):
         train_data = []
