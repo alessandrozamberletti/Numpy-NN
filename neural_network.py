@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from IrisManager import IrisManager
+from iris_manager import IrisManager
 
 
 class NeuralNetwork:
