@@ -1,7 +1,7 @@
 # Numpy-NN
 NumPy Feedforward Neural Network
 
-![neural_network-training](https://github.com/alessandrozamberletti/NumPy-NN/blob/master/res/numpy-nn.gif)
+![neural_network-training](./res/numpy-nn.gif)
 
 ```python
 train, validation, test = IrisManager('res/iris.data').split()
